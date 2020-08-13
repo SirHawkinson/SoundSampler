@@ -21,7 +21,9 @@ namespace SoundSampler
         public const double SLOW_MS = 1000 / 16.0;
         public const double MED_MS = 1000 / 30.0;
         public const double FAST_MS = 1000 / 60.0;
-        public const double FULL_MS= 1000 / 60.0;
+        public const double FULL_MS= 1000 / 120.0;
+        public const double FULLSPEEDAHEAD_MS = 1000 / 400.0;
+
 
         // The systray icon and main app control
         private NotifyIcon systrayIcon;
@@ -41,11 +43,12 @@ namespace SoundSampler
             systrayIcon = new NotifyIcon();
             systrayIcon.ContextMenu = new ContextMenu(new MenuItem[] {
                 new MenuItem("Update Speed", new MenuItem[] {
-                    new MenuItem("Chill (8Hz)", (s, e) => UpdateSpeed_Click(s, VERYSLOW_MS)),
-                    new MenuItem("Medium (16Hz)", (s, e) => UpdateSpeed_Click(s, SLOW_MS)),
-                    new MenuItem("Fast (30Hz)", (s, e) => UpdateSpeed_Click(s, MED_MS)),
-                    new MenuItem("Full (60Hz)", (s, e) => UpdateSpeed_Click(s, FAST_MS)),
-                    new MenuItem("Full (120Hz)", (s, e) => UpdateSpeed_Click(s, FULL_MS))
+                    new MenuItem("Very slow (8Hz)", (s, e) => UpdateSpeed_Click(s, VERYSLOW_MS)),
+                    new MenuItem("Slow (16Hz)", (s, e) => UpdateSpeed_Click(s, SLOW_MS)),
+                    new MenuItem("Medium (30Hz)", (s, e) => UpdateSpeed_Click(s, MED_MS)),
+                    new MenuItem("Fast (60Hz)", (s, e) => UpdateSpeed_Click(s, FAST_MS)),
+                    new MenuItem("Full (120Hz)", (s, e) => UpdateSpeed_Click(s, FULL_MS)),
+                    new MenuItem("FullSpeed (400Hz)", (s, e) => UpdateSpeed_Click(s, FULLSPEEDAHEAD_MS))
                 }),
                 new MenuItem("Exit SpectrumLED", OnApplicationExit)
             });
