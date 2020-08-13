@@ -14,11 +14,6 @@ namespace SoundSampler
         const int MIN_FREQ = 20;
         const int MAX_FREQ = 20000;
 
-        // The weight given to the previous sample for time-based smoothing. Setting this to .1, .2,
-        // or even .3 will make the per-column spectrum drops take longer so there is less
-        // flickering.  dlbeer (http://dlbeer.co.nz/articles/fftvis.html) recommends setting this
-        // based on the sample (here, the tick) rate
-        const float SMOOTHING = 0.0001f;
         // Drop the index to 0 if below this threshold. Helps prevent lingering color after sound
         // has stopped
         const float MIN_THRESHOLD = 0.001f;
@@ -35,9 +30,6 @@ namespace SoundSampler
         int minFreqIdx;
         int maxFreqIdx;
         int[] logFreqIdxs = new int[NUM_IDXS];
-
-        // Previous-sample spectrum data
-        float[] prevSpectrumValues = new float[NUM_COLS];
 
         /*
          * Initialize the SampleHandler with the number of audio channels and the sample rate.
@@ -77,7 +69,7 @@ namespace SoundSampler
          */
         // *Decibel scaling method:
         // spectrumValues[i] = (((20 * Math.Log10(fftBuf[logFreqIdxs[i]])) - (-90)) / 90);
-        // Sqrt scaling method:
+        // Sqrt scaling method ***this method requires code revisiting, I cba***:
         // spectrumValues[i] = Math.Sqrt(fftBuf[logFreqIdxs[i]]) * 2;
         public float[] GetSpectrumValues()
         {
@@ -90,21 +82,22 @@ namespace SoundSampler
             // Do the FFT
             fftProvider.GetFftData(fftBuf);
 
+         
             float[] spectrumValues = new float[NUM_COLS];
             for (int i = 0; i < NUM_COLS; i++)
             {
                 // Find the max within each frequency band, then apply Decibel scaling,
-                // per-index scaling (to bring up the mid-high end), time smoothing,
+                // per-index scaling (to bring up the mid-high end)
                 // and a minimum threshold
                 int bandSize = logFreqIdxs[i + 1] - logFreqIdxs[i];
-                float max = new ArraySegment<float>(fftBuf, logFreqIdxs[i], bandSize).Max();
+                float max = new ArraySegment<float>(fftBuf, 0, bandSize).Max();
                 float dbScaled = Math.Max((float)((20 * Math.Log10(max) + 90) / 90), 0);
-                float idxScaled = dbScaled + (float)Math.Sqrt((double)i / (double)NUM_COLS) * dbScaled;
-                float smoothed = prevSpectrumValues[i] * SMOOTHING + idxScaled * (1 - SMOOTHING);
+                float smoothed = dbScaled + (float)Math.Sqrt((double)i / (double)NUM_COLS) * dbScaled;
                 spectrumValues[i] = smoothed < MIN_THRESHOLD ? 0 : smoothed;
+                
             }
 
-            return prevSpectrumValues = spectrumValues;
+            return spectrumValues;
         }
 
     }

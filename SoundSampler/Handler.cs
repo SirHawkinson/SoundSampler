@@ -18,9 +18,12 @@ namespace SoundSampler
         {
             float[] normalized = Normalize(raw);
             int filtered = Filter(normalized);
+            Console.WriteLine("post stuff" +
+                " 1= " + Convert.ToInt32(normalized[0]) + " 2= " + Convert.ToInt32(normalized[1]) + " 3= " + Convert.ToInt32(normalized[2]) + " 4= " + Convert.ToInt32(normalized[3]) + " 5= " + Convert.ToInt32(normalized[4]) + " 6= " + Convert.ToInt32(normalized[5]) + " 7= " + Convert.ToInt32(normalized[6]) +
+                " 8= " + Convert.ToInt32(normalized[7]) + " 9= " + Convert.ToInt32(normalized[8]) + " 10= " + Convert.ToInt32(normalized[9]) + " filt " + filtered);
             //COM handling, self explanatory
             SamplerApp samp = new SamplerApp();
-            samp.COMSend(filtered);
+            samp.COMSend(Convert.ToInt32(normalized[2]));
         }
         
         /*
