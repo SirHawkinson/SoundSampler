@@ -23,7 +23,7 @@ namespace SoundSampler
                 " 8= " + Convert.ToInt32(normalized[7]) + " 9= " + Convert.ToInt32(normalized[8]) + " 10= " + Convert.ToInt32(normalized[9]) + " filt " + filtered);
             //COM handling, self explanatory
             SamplerApp samp = new SamplerApp();
-            samp.COMSend(Convert.ToInt32(normalized[2]));
+            samp.COMSend(filtered);
         }
         
         /*
