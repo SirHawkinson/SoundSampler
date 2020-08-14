@@ -12,7 +12,7 @@ namespace SoundSampler
         const int FFT_SIZE_INT = (int)FFT_SIZE;
         const int MAX_FFT_IDX = FFT_SIZE_INT / 2 - 1;
         const int MIN_FREQ = 20;
-        const int MAX_FREQ = 20000;
+        const int MAX_FREQ = 16000;
 
         /* The weight given to the previous sample for time-based smoothing. High value works great when 
            sending it to the LED stripewhen the software is set to a high refresh rate, making the 
@@ -112,8 +112,7 @@ namespace SoundSampler
                 int bandSize = logFreqIdxs[i + 1] - logFreqIdxs[i];
                 float max = new ArraySegment<float>(fftBuf, logFreqIdxs[i], bandSize).Max();
                 float Scaled = Math.Max((float)max, 0);
-                float idxScaled = Scaled + (float)Math.Sqrt((double)i / (double)NUM_COLS) * Scaled;
-                float smoothed = prevSpectrumValues[i] * SMOOTHING + idxScaled * (1 - SMOOTHING);
+                float smoothed = prevSpectrumValues[i] * SMOOTHING + Scaled * (1 - SMOOTHING);
                 spectrumValues[i] = smoothed < MIN_THRESHOLD ? 0 : smoothed;
             }
 
