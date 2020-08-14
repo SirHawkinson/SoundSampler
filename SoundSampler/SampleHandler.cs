@@ -14,11 +14,15 @@ namespace SoundSampler
         const int MIN_FREQ = 20;
         const int MAX_FREQ = 20000;
 
-        // The weight given to the previous sample for time-based smoothing. High value works great when sending it to the LED stripe
-        // when the software is set to a high refresh rate, making the transition between values much milder, lower values increase accuracy.
-        //Setting it too low on a high refreshed stripe introduces VERY annoying flicker. dlbeer (http://dlbeer.co.nz/articles/fftvis.html) 
-        //recommends setting this based on the sample (here, the tick) rate
+        /* The weight given to the previous sample for time-based smoothing. High value works great when 
+           sending it to the LED stripewhen the software is set to a high refresh rate, making the 
+           transition between values much milder, lower values increase accuracy of sampling.
+           Setting it too low on a high refreshed stripe introduces VERY annoying flicker. dlbeer 
+           (http://dlbeer.co.nz/articles/fftvis.html) recommends setting this based on the
+           sample (here, the tick) rate
+        */
         const float SMOOTHING = 0.85f;
+
         // Drop the index to 0 if below this threshold. Helps prevent lingering color after sound
         // has stopped
         const float MIN_THRESHOLD = 0.001f;
@@ -37,8 +41,8 @@ namespace SoundSampler
         int[] logFreqIdxs = new int[NUM_IDXS];
 
         /*
-         * Initialize the SampleHandler with the number of audio channels and the sample rate.
-         * These are used to determine
+          Initialize the SampleHandler with the number of audio channels and the sample rate.
+          These are used to determine
          */
 
         // Previous-sample spectrum data
@@ -74,13 +78,17 @@ namespace SoundSampler
         }
 
         /*
-         * Get the current array of sample data by running the FFT and massaging the output.
-         */
-        // *Decibel scaling method:
-        // spectrumValues[i] = (((20 * Math.Log10(fftBuf[logFreqIdxs[i]])) - (-90)) / 90);
-        // *Square root slacing method:
-        // ***this method requires code revisiting I cba***:
-        // spectrumValues[i] = Math.Sqrt(fftBuf[logFreqIdxs[i]]) * 2;
+         Get the current array of sample data by running the FFT and massaging the output. 
+
+         Decibel scaling method:
+         spectrumValues[i] = (((20 * Math.Log10(fftBuf[logFreqIdxs[i]])) - (-90)) / 90);
+
+         *Square root slacing method:
+         ***this method requires code revisiting I cba***
+         spectrumValues[i] = Math.Sqrt(fftBuf[logFreqIdxs[i]]) * 2;
+
+         Currently it's ran by amplitude scaling
+        */ 
         public float[] GetSpectrumValues()
         {
             if (!fftProvider.IsNewDataAvailable)
@@ -96,18 +104,21 @@ namespace SoundSampler
             float[] spectrumValues = new float[NUM_COLS];
             for (int i = 0; i < NUM_COLS; i++)
             {
-                // Find the max within each frequency band, then apply per-index scaling 
-                //(to bring up the mid-high end)
-                // and a minimum threshold
+                /* Find the max within each frequency band, then apply per-index scaling 
+                (to bring up the mid-high end) and a minimum threshold
+                float dbScaled = Math.Max((float)((20 * Math.Log10(max) + 90) / 90), 0);
+                float idxScaled = dbScaled + (float)Math.Sqrt((double)i / (double)NUM_COLS) * dbScaled;
+                */
                 int bandSize = logFreqIdxs[i + 1] - logFreqIdxs[i];
-                float max = new ArraySegment<float>(fftBuf, 0, bandSize).Max();
-                float smoothed = prevSpectrumValues[i] * SMOOTHING + max * (1 - SMOOTHING);
+                float max = new ArraySegment<float>(fftBuf, logFreqIdxs[i], bandSize).Max();
+                float Scaled = Math.Max((float)max, 0);
+                float idxScaled = Scaled + (float)Math.Sqrt((double)i / (double)NUM_COLS) * Scaled;
+                float smoothed = prevSpectrumValues[i] * SMOOTHING + idxScaled * (1 - SMOOTHING);
                 spectrumValues[i] = smoothed < MIN_THRESHOLD ? 0 : smoothed;
             }
 
             return prevSpectrumValues = spectrumValues;
            
         }
-
     }
 }
