@@ -48,7 +48,7 @@ namespace SoundSampler
                     new MenuItem("Medium (30Hz)", (s, e) => UpdateSpeed_Click(s, MED_MS)),
                     new MenuItem("Fast (60Hz)", (s, e) => UpdateSpeed_Click(s, FAST_MS)),
                     new MenuItem("Full (120Hz)", (s, e) => UpdateSpeed_Click(s, FULL_MS)),
-                    new MenuItem("FullSpeed (400Hz)", (s, e) => UpdateSpeed_Click(s, FULLSPEEDAHEAD_MS))
+                    new MenuItem("FullSpeed (400Hz)", (s, e) => UpdateSpeed_Click(s, FULLSPEEDAHEAD_MS)),
                 }),
                 new MenuItem("Exit SpectrumLED", OnApplicationExit)
             });

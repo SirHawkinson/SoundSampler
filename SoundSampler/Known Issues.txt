@@ -1,0 +1,1 @@
+﻿1. Program crashes when enabling sound capture when there is no audio in the background during first initialization

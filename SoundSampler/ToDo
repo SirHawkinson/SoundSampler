@@ -1,0 +1,4 @@
+﻿1. Selectable COM list
+2. Optional correctors to audio columns respecting human ear sensitivity to certain sound frequencies - swappable between corrected and raw audio spectrum
+3. Colour selection, further sent to arduino(?)
+4. For further evaluation...
