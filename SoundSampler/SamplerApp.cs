@@ -7,7 +7,6 @@ using System.IO.Ports;
 
 namespace SoundSampler
 {
-
     /*
      Audio capture, USB handling, settings and variables initializator. 
      */
@@ -36,7 +35,7 @@ namespace SoundSampler
         public SamplerApp()
         {
             // Init the timer
-            ticker = new Timer(SamplerAppContext.Veryfast_MS);
+            ticker = new Timer(SamplerAppContext.Slow_MS);
             ticker.Elapsed += Tick;
 
             Port = "COM7";
@@ -75,8 +74,7 @@ namespace SoundSampler
         public void COMSend(int data)
         {
             byte[] b = BitConverter.GetBytes(data);
-            _serialPort.Write(b,0,1);
-
+            _serialPort.Write(b, 0, 1);
         }
 
         /*
@@ -109,18 +107,10 @@ namespace SoundSampler
          */
         private void Tick(object sender, ElapsedEventArgs e)
         {
-            
             // Get the FFT results and send to Handler
             float[] values = SampleHandler.GetSpectrumValues();
-            if (values != null)
-            {
+           
                 Handler.DataSend(values);
-            }
-            else
-            {
-                byte[] nodata = BitConverter.GetBytes(0);
-                _serialPort.Write(nodata, 0, 1);
-            }
         }
 
         /*
@@ -130,7 +120,7 @@ namespace SoundSampler
         private void StartCapture()
         {
             // Initialize hardware capture
-            capture = new WasapiLoopbackCapture();
+            capture = new WasapiLoopbackCapture(10);
             capture.Initialize();
 
             // Init sample handler

@@ -89,8 +89,8 @@ namespace SoundSampler
             }
 
             else
-                // Do the FFT
-                fftProvider.GetFftData(fftBuf);
+            // Do the FFT
+            fftProvider.GetFftData(fftBuf);
             
          
             float[] spectrumValues = new float[NUM_COLS];

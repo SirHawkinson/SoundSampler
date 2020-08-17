@@ -21,7 +21,7 @@ namespace SoundSampler
             Console.WriteLine("post stuff" +
                 " 1= " + Convert.ToInt32(normalized[0]) + " 2= " + Convert.ToInt32(normalized[1]) + " 3= " + Convert.ToInt32(normalized[2]) + " 4= " + Convert.ToInt32(normalized[3]) + " 5= " + Convert.ToInt32(normalized[4]) + " 6= " + Convert.ToInt32(normalized[5]) + " 7= " + Convert.ToInt32(normalized[6]) +
                 " 8= " + Convert.ToInt32(normalized[7]) + " 9= " + Convert.ToInt32(normalized[8]) + " 10= " + Convert.ToInt32(normalized[9]) + " filt " + filtered);
-            //COM handling, self explanatory
+            // Send filtered column to COM
             SamplerApp samp = new SamplerApp();
             samp.COMSend(filtered);
         }
@@ -31,15 +31,9 @@ namespace SoundSampler
          */
         private int Filter(float[] normalized)
         {
-            if (normalized != null)
-                return Convert.ToInt32(normalized.Max());
-            else
-            {
-                Array.Clear(normalized, 0, normalized.Length);
-                return Convert.ToInt32(normalized);
-            }
+        return Convert.ToInt32(normalized.Max());
         }
-     
+
         /*
         * Normalize the raw data into values between 0 and the something. The max value is subject to entropy so large spikes don't
         * ruin the cool.
@@ -47,18 +41,17 @@ namespace SoundSampler
         private float[] Normalize(float[] raw)
         {
             float[] normalized = new float[raw.Length];
+        
+        // Use maxSeenEver to normalize the range into 0-Height
+        maxSeenEver = Math.Max(raw.Max(), maxSeenEver);
 
-            // Use maxSeenEver to normalize the range into 0-Height
-            maxSeenEver = Math.Max(raw.Max(), maxSeenEver);
-
-            for (int i = 0; i < raw.Length; i++)
-            {
+           for (int i = 0; i < raw.Length; i++)
+             {
                 normalized[i] = raw[i] / maxSeenEver * Height;
-            }
+             }
 
-            // Slowly decrease maxEverSeen to keep things normalizing after a giant spike
-           maxSeenEver *= MAX_ENTROPY;
-            
+        // Slowly decrease maxEverSeen to keep things normalizing after a giant spike
+        maxSeenEver *= MAX_ENTROPY;
             return normalized;
         }
     }
