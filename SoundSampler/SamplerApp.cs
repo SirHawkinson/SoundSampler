@@ -9,13 +9,15 @@ namespace SoundSampler
 {
 
     /*
-     * The real meat of the app, outside all that Windows junk. Handles audio device initialization,
-     * data capture, and audio rendering.
+     Audio capture, USB handling, settings and variables initializator. 
      */
     public class SamplerApp
     {
         //Serial ports initializations
         static SerialPort _serialPort;
+        private string Port;
+        private int baud;
+
         // Our ticker that triggers audio re-rendering. User-controllable via the systray menu
         private Timer ticker;
 
@@ -34,8 +36,11 @@ namespace SoundSampler
         public SamplerApp()
         {
             // Init the timer
-            ticker = new Timer(SamplerAppContext.SLOW_MS);
+            ticker = new Timer(SamplerAppContext.Veryfast_MS);
             ticker.Elapsed += Tick;
+
+            Port = "COM7";
+            baud = 115200;
 
             // Create a handler
             Handler = new Handler();
@@ -48,10 +53,9 @@ namespace SoundSampler
         {
             if (enabled)
             {
-                _serialPort = new SerialPort("COM7", 115200);
+                _serialPort = new SerialPort(Port, baud);
                 _serialPort.ReadTimeout = 250;
                 _serialPort.WriteTimeout = 250;
-
                 _serialPort.Open();
                 StartCapture();
                 ticker.Start();
@@ -59,17 +63,21 @@ namespace SoundSampler
             else
             {
                 StopCapture();
+                byte[] end =BitConverter.GetBytes(0);
+                _serialPort.Write(end, 0, 1);
                 _serialPort.Close();
                 ticker.Stop();
                 
             }
         }
+
+        // Convert data to bits then send through selected COM
         public void COMSend(int data)
         {
             byte[] b = BitConverter.GetBytes(data);
             _serialPort.Write(b,0,1);
-        }
 
+        }
 
         /*
          * Update the timer tick speed, which updates the FFT and sound rendering speeds(?).
@@ -78,6 +86,13 @@ namespace SoundSampler
         {
             // No need to stop/start, setting Interval does that
             ticker.Interval = intervalMs;
+        }
+
+        // Initiate a new COM port and open it
+        public void Selected_COMPort(string COMPort)
+        {
+            Port = COMPort;
+            Console.WriteLine(COMPort);
         }
 
         /*
@@ -94,11 +109,17 @@ namespace SoundSampler
          */
         private void Tick(object sender, ElapsedEventArgs e)
         {
+            
             // Get the FFT results and send to Handler
             float[] values = SampleHandler.GetSpectrumValues();
             if (values != null)
             {
                 Handler.DataSend(values);
+            }
+            else
+            {
+                byte[] nodata = BitConverter.GetBytes(0);
+                _serialPort.Write(nodata, 0, 1);
             }
         }
 

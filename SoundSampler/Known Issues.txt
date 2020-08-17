@@ -1,2 +1,3 @@
 ﻿1. Program crashes when enabling sound capture when there is no audio in the background during first initialization
 2. Program crashes when stopping capture (lol)
+3. Null values when setting calculations beyond 65Hz

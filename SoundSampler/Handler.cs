@@ -31,7 +31,13 @@ namespace SoundSampler
          */
         private int Filter(float[] normalized)
         {
-            return Convert.ToInt32(normalized.Max());
+            if (normalized != null)
+                return Convert.ToInt32(normalized.Max());
+            else
+            {
+                Array.Clear(normalized, 0, normalized.Length);
+                return Convert.ToInt32(normalized);
+            }
         }
      
         /*

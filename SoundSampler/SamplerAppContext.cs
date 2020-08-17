@@ -2,28 +2,26 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO.Ports;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SoundSampler
 {
 
     /*
-     * Main application context. SpectrumLED only runs in the systray (no forms). The icon is the
-     * main interaction with the functionality: enable/disable on click, right click for context
-     * menu to set options and exit.
+     * Application context frame. Since the app runs only in the quick bar (so no windows or forms)
+     * you can only interact with the program by enabling or disabling it on left click. You can
+     * access its menu (COM Port,refresh rate selection and exit)
      */
     public class SamplerAppContext : ApplicationContext
     {
-        
-     
-
         // Refresh rate options
-        public const double VERYSLOW_MS = 1000 / 8.0;
-        public const double SLOW_MS = 1000 / 16.0;
-        public const double MED_MS = 1000 / 30.0;
-        public const double FAST_MS = 1000 / 60.0;
-        public const double FULL_MS= 1000 / 120.0;
-        public const double FULLSPEEDAHEAD_MS = 1000 / 400.0;
 
+        public const double Slow_MS = 1000 / 30.0;
+        public const double Med_MS = 1000 / 60.0;
+        public const double Fast_MS = 1000 / 120.0;
+        public const double Veryfast_MS = 1000 / 400.0;
 
         // The systray icon and main app control
         private NotifyIcon systrayIcon;
@@ -40,19 +38,25 @@ namespace SoundSampler
         {
             SoundSampler = new SamplerApp();
 
+            MenuItem COMList = new MenuItem("COM List");
+            COMlist().ForEach(COM => COMList.MenuItems.Add(
+                    new MenuItem(COM, (s, e) => SetCOMPort(s, COM.ToString()))));
+
             systrayIcon = new NotifyIcon();
+
             systrayIcon.ContextMenu = new ContextMenu(new MenuItem[] {
+                COMList,
                 new MenuItem("Update Speed", new MenuItem[] {
-                    new MenuItem("Very slow (8Hz)", (s, e) => UpdateSpeed_Click(s, VERYSLOW_MS)),
-                    new MenuItem("Slow (16Hz)", (s, e) => UpdateSpeed_Click(s, SLOW_MS)),
-                    new MenuItem("Medium (30Hz)", (s, e) => UpdateSpeed_Click(s, MED_MS)),
-                    new MenuItem("Fast (60Hz)", (s, e) => UpdateSpeed_Click(s, FAST_MS)),
-                    new MenuItem("Full (120Hz)", (s, e) => UpdateSpeed_Click(s, FULL_MS)),
-                    new MenuItem("FullSpeed (400Hz)", (s, e) => UpdateSpeed_Click(s, FULLSPEEDAHEAD_MS)),
+                    new MenuItem("Slow (30Hz)", (s, e) => UpdateSpeed_Click(s, Slow_MS)),
+                    new MenuItem("Medium (60Hz)", (s, e) => UpdateSpeed_Click(s, Med_MS)),
+                    new MenuItem("Fast (120Hz)", (s, e) => UpdateSpeed_Click(s, Fast_MS)),
+                    new MenuItem("Full (400Hz)", (s, e) => UpdateSpeed_Click(s, Veryfast_MS)),
                 }),
                 new MenuItem("Exit SpectrumLED", OnApplicationExit)
             });
-            systrayIcon.ContextMenu.MenuItems[0].MenuItems[0].Checked = true;
+
+            systrayIcon.ContextMenu.MenuItems[0].MenuItems[0].Checked = false;
+            systrayIcon.ContextMenu.MenuItems[1].MenuItems[3].Checked = true;
             systrayIcon.MouseClick += SystrayIcon_Click;
             systrayIcon.Icon = Icon.FromHandle(Resources.SoundSampler.GetHicon());
             systrayIcon.Text = "SoundSampler";
@@ -70,7 +74,21 @@ namespace SoundSampler
             Application.Exit();
         }
 
+        // Get a list of serial port names
+        private List<string> COMlist()
+        {
 
+            string[] ports = SerialPort.GetPortNames();
+            List<string> list = ports.ToList();
+            return list;
+        }
+
+        // Select COM port
+        private void SetCOMPort(object sender, string port)
+        {
+            CheckMeAndUncheckSiblings((MenuItem)sender);
+            SoundSampler.Selected_COMPort(port);
+        }
 
         /*
          * Left click callback handler. Enables/disables.
@@ -84,7 +102,6 @@ namespace SoundSampler
             }
         }
 
-   
         /*
          * Speed options callback handler. Sets the tick/render speed in the app.
          */
@@ -103,5 +120,6 @@ namespace SoundSampler
             }
         }
 
-    }
+        // Exceptions handling
+    }   
 }

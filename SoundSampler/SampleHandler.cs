@@ -28,8 +28,8 @@ namespace SoundSampler
         const float MIN_THRESHOLD = 0.001f;
 
         // The number of index points to take from the raw FFT data
-        const int NUM_COLS = 10;
-        const int NUM_IDXS = NUM_COLS + 1; // indexes surround columns
+        public const int NUM_COLS = 10;
+        public const int NUM_IDXS = NUM_COLS + 1; // indexes surround columns
 
         // FFT fields
         FftProvider fftProvider;
@@ -79,15 +79,6 @@ namespace SoundSampler
 
         /*
          Get the current array of sample data by running the FFT and massaging the output. 
-
-         Decibel scaling method:
-         spectrumValues[i] = (((20 * Math.Log10(fftBuf[logFreqIdxs[i]])) - (-90)) / 90);
-
-         *Square root slacing method:
-         ***this method requires code revisiting I cba***
-         spectrumValues[i] = Math.Sqrt(fftBuf[logFreqIdxs[i]]) * 2;
-
-         Currently it's ran by amplitude scaling
         */ 
         public float[] GetSpectrumValues()
         {
@@ -97,8 +88,9 @@ namespace SoundSampler
                 return null;
             }
 
-            // Do the FFT
-            fftProvider.GetFftData(fftBuf);
+            else
+                // Do the FFT
+                fftProvider.GetFftData(fftBuf);
             
          
             float[] spectrumValues = new float[NUM_COLS];
@@ -106,8 +98,6 @@ namespace SoundSampler
             {
                 /* Find the max within each frequency band, then apply per-index scaling 
                 (to bring up the mid-high end) and a minimum threshold
-                float dbScaled = Math.Max((float)((20 * Math.Log10(max) + 90) / 90), 0);
-                float idxScaled = dbScaled + (float)Math.Sqrt((double)i / (double)NUM_COLS) * dbScaled;
                 */
                 int bandSize = logFreqIdxs[i + 1] - logFreqIdxs[i];
                 float max = new ArraySegment<float>(fftBuf, logFreqIdxs[i], bandSize).Max();
