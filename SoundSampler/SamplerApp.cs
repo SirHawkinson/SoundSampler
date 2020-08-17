@@ -35,10 +35,10 @@ namespace SoundSampler
         public SamplerApp()
         {
             // Init the timer
-            ticker = new Timer(SamplerAppContext.Slow_MS);
+            ticker = new Timer(SamplerAppContext.Veryfast_MS);
             ticker.Elapsed += Tick;
 
-            Port = "COM7";
+            Port = null;
             baud = 115200;
 
             // Create a handler
