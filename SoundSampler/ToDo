@@ -1,7 +1,4 @@
 ﻿1. Optional correctors to audio columns respecting human ear sensitivity to certain sound frequencies - swappable between corrected and raw audio spectrum
 2. Colour selection, further sent to arduino(?)
 3. Settings remembering
-
-4. "No port" exception catching
-
 4. For further evaluation...
