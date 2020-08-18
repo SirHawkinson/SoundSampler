@@ -1,2 +1,3 @@
 ﻿1. Null values when setting calculations beyond 65Hz (framework too slow for that?)
-2. Seen as threat by system
+2. Can be seen as a threat by SmartScreen
+3. Program will crash on startup if there is no COM device connected at all (can't list a null, now can you?)

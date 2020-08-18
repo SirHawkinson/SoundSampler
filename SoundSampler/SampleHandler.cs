@@ -25,7 +25,8 @@ namespace SoundSampler
         // has stopped
         const float MIN_THRESHOLD = 0.001f;
 
-        /* The number of index points to take from the raw FFT data. Number of columns corresponds
+        /* 
+         * The number of index points to take from the raw FFT data. Number of columns corresponds
          * with a standard 10 bands equalizers
          */
 

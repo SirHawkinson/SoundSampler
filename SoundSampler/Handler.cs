@@ -5,7 +5,7 @@ namespace SoundSampler
 {
     public class Handler
     {
-        /* Original code comes from https://github.com/glowboy/SpectrumLED
+        /* 
         *  During normalization, scale the FFT values by the maximum value seen to get nice,
         *  mostly-mid-ranged values. Reduce the maximum ever seen with each tick so giant spikes
         *  don't make the pretty colors disappear
