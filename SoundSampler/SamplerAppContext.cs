@@ -12,16 +12,16 @@ namespace SoundSampler
     /*
      * Application context frame. Since the app runs only in the quick bar (so no windows or forms)
      * you can only interact with the program by enabling or disabling it on left click. You can
-     * access its menu (COM Port,refresh rate selection and exit)
+     * access its menu (COM Port,refresh rate selection and exit). 
      */
     public class SamplerAppContext : ApplicationContext
     {
         // Refresh rate options
-
         public const double Slow_MS = 1000 / 30.0;
         public const double Med_MS = 1000 / 60.0;
         public const double Fast_MS = 1000 / 120.0;
         public const double Veryfast_MS = 1000 / 400.0;
+        public const double Exp_MS = 1000 / 1000.0;
 
         // The systray icon and main app control
         private NotifyIcon systrayIcon;
@@ -29,6 +29,7 @@ namespace SoundSampler
 
         // Master enabled state
         private Boolean enabled = false;
+        private string selectedPort;
 
         /*
          * Set up the application. Configures the main app handler, creates and initializes the
@@ -37,7 +38,7 @@ namespace SoundSampler
         public SamplerAppContext()
         {
             SoundSampler = new SamplerApp();
-
+            selectedPort = null;
             MenuItem COMList = new MenuItem("COM List");
             COMlist().ForEach(COM => COMList.MenuItems.Add(
                     new MenuItem(COM, (s, e) => SetCOMPort(s, COM.ToString()))));
@@ -51,6 +52,7 @@ namespace SoundSampler
                     new MenuItem("Medium (60Hz)", (s, e) => UpdateSpeed_Click(s, Med_MS)),
                     new MenuItem("Fast (120Hz)", (s, e) => UpdateSpeed_Click(s, Fast_MS)),
                     new MenuItem("Full (400Hz)", (s, e) => UpdateSpeed_Click(s, Veryfast_MS)),
+                    new MenuItem("Exp (1000Hz)", (s, e) => UpdateSpeed_Click(s, Exp_MS)), // By the time making this program I didn't own a 1kHz refresh rate led strip, so not quite sure how it would behave
                 }),
                 new MenuItem("Exit SpectrumLED", OnApplicationExit)
             });
@@ -58,7 +60,7 @@ namespace SoundSampler
             systrayIcon.ContextMenu.MenuItems[0].MenuItems[0].Checked = false;
             systrayIcon.ContextMenu.MenuItems[1].MenuItems[3].Checked = true;
             systrayIcon.MouseClick += SystrayIcon_Click;
-            systrayIcon.Icon = Icon.FromHandle(Resources.SoundSampler.GetHicon());
+            systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerOFF.GetHicon());
             systrayIcon.Text = "SoundSampler";
             systrayIcon.Visible = true;
         }
@@ -88,18 +90,32 @@ namespace SoundSampler
         {
             CheckMeAndUncheckSiblings((MenuItem)sender);
             SoundSampler.Selected_COMPort(port);
+            selectedPort = port;
         }
 
         /*
-         * Left click callback handler. Enables/disables.
+         * Left click callback handler. Enables/disables, switches between icons.
          */
         private void SystrayIcon_Click(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                enabled = !enabled;
-                SoundSampler.SetEnabled(enabled);
+                if (selectedPort == null)
+                {
+                    MessageBox.Show("Please select a port.",
+                              "No port selected.", MessageBoxButtons.OK);
+                }
+                else
+                {
+                    enabled = !enabled;
+                    if (enabled == true)
+                        systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerON.GetHicon());
+                    else
+                        systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerOFF.GetHicon());
+                    SoundSampler.SetEnabled(enabled);
+                }
             }
+            
         }
 
         /*
@@ -111,7 +127,6 @@ namespace SoundSampler
             SoundSampler.UpdateTickSpeed(intervalMs);
         }
 
-        // The definition of self-documenting code. Does this comment negate that?
         private void CheckMeAndUncheckSiblings(MenuItem me)
         {
             foreach (MenuItem child in me.Parent.MenuItems)

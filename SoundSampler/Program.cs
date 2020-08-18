@@ -6,11 +6,6 @@ namespace SoundSampler
     static class Program
 
     {
-       
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
@@ -18,7 +13,6 @@ namespace SoundSampler
             SamplerAppContext app = new SamplerAppContext();
             Application.ApplicationExit += app.OnApplicationExit;
             Application.Run(app);
-           
         }
     }
 }

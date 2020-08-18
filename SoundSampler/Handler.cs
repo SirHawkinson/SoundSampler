@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 namespace SoundSampler
 {
     public class Handler
-    { 
-        // During normalization, scale the FFT values by the maximum value seen to get nice,
-        // mostly-mid-ranged values. Reduce the maximum ever seen with each tick so giant spikes
-        // don't make the pretty colors disappear
+    {
+        /* Original code comes from https://github.com/glowboy/SpectrumLED
+        *  During normalization, scale the FFT values by the maximum value seen to get nice,
+        *  mostly-mid-ranged values. Reduce the maximum ever seen with each tick so giant spikes
+        *  don't make the pretty colors disappear
+        */
         const float MAX_ENTROPY = 0.999f;
         float maxSeenEver = 0;
         int Height = 100;
@@ -18,9 +21,13 @@ namespace SoundSampler
         {
             float[] normalized = Normalize(raw);
             int filtered = Filter(normalized);
-            Console.WriteLine("post stuff" +
+            
+            // Atrocious, but debug only
+            /* Console.WriteLine("post stuff" +
                 " 1= " + Convert.ToInt32(normalized[0]) + " 2= " + Convert.ToInt32(normalized[1]) + " 3= " + Convert.ToInt32(normalized[2]) + " 4= " + Convert.ToInt32(normalized[3]) + " 5= " + Convert.ToInt32(normalized[4]) + " 6= " + Convert.ToInt32(normalized[5]) + " 7= " + Convert.ToInt32(normalized[6]) +
                 " 8= " + Convert.ToInt32(normalized[7]) + " 9= " + Convert.ToInt32(normalized[8]) + " 10= " + Convert.ToInt32(normalized[9]) + " filt " + filtered);
+            */
+
             // Send filtered column to COM
             SamplerApp samp = new SamplerApp();
             samp.COMSend(filtered);

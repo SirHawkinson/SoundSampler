@@ -4,6 +4,7 @@ using CSCore.Streams;
 using System;
 using System.Timers;
 using System.IO.Ports;
+using System.Windows.Forms;
 
 namespace SoundSampler
 {
@@ -12,20 +13,20 @@ namespace SoundSampler
      */
     public class SamplerApp
     {
-        //Serial ports initializations
+        //Serial ports initialization variables
         static SerialPort _serialPort;
         private string Port;
         private int baud;
 
-        // Our ticker that triggers audio re-rendering. User-controllable via the systray menu
-        private Timer ticker;
+        // Ticker that triggers audio re-rendering. User-controllable via the systray menu
+        private System.Timers.Timer ticker;
 
         // CSCore classes that read the WASAPI data and pass it to the SampleHandler
         private WasapiCapture capture;
         private SingleBlockNotificationStream notificationSource;
         private IWaveSource finalSource;
 
-        // An attempt at only-just-post-stream-of-consciousness code organization
+        // In-program class calls
         private SampleHandler SampleHandler;
         private Handler Handler;
 
@@ -35,7 +36,7 @@ namespace SoundSampler
         public SamplerApp()
         {
             // Init the timer
-            ticker = new Timer(SamplerAppContext.Veryfast_MS);
+            ticker = new System.Timers.Timer(SamplerAppContext.Veryfast_MS);
             ticker.Elapsed += Tick;
 
             Port = null;
@@ -52,19 +53,24 @@ namespace SoundSampler
         {
             if (enabled)
             {
-                _serialPort = new SerialPort(Port, baud);
-                _serialPort.ReadTimeout = 250;
-                _serialPort.WriteTimeout = 250;
-                _serialPort.Open();
-                StartCapture();
-                ticker.Start();
+                    _serialPort = new SerialPort(Port, baud);
+                    _serialPort.ReadTimeout = 250;
+                    _serialPort.WriteTimeout = 250;
+                    _serialPort.Open();
+                    StartCapture();
+                    ticker.Start();
             }
             else
             {
                 StopCapture();
+
+                // Send zero bit through port, this will force LEDs to blackout
                 byte[] end =BitConverter.GetBytes(0);
                 _serialPort.Write(end, 0, 1);
-                _serialPort.Close();
+                if (_serialPort.IsOpen == true)
+                {
+                    _serialPort.Close();
+                }
                 ticker.Stop();
                 
             }
@@ -90,15 +96,23 @@ namespace SoundSampler
         public void Selected_COMPort(string COMPort)
         {
             Port = COMPort;
-            Console.WriteLine(COMPort);
         }
 
         /*
-         * Cleanly release audio resources.
+         * Disable the program upon shutting down to clear data and close ports without having to pause the program beforehand.
+         * Dirty, but couldn't think of anything else.
          */
         public void Shutdown(object sender, EventArgs e)
         {
-            SetEnabled(false);
+            try
+            {
+                SetEnabled(false);
+            }
+            catch (Exception exc)
+            {
+                
+                
+            }
         }
 
         /*
@@ -123,13 +137,12 @@ namespace SoundSampler
             capture = new WasapiLoopbackCapture(10);
             capture.Initialize();
 
-            // Init sample handler
+            // Initialize sample handler
             SampleHandler = new SampleHandler(capture.WaveFormat.Channels, capture.WaveFormat.SampleRate);
 
             // Configure per-block reads rather than per-sample reads
             notificationSource = new SingleBlockNotificationStream(new SoundInSource(capture).ToSampleSource());
             notificationSource.SingleBlockRead += (s, e) => SampleHandler.Add(e.Left, e.Right);
-
             finalSource = notificationSource.ToWaveSource();
             capture.DataAvailable += (s, e) => finalSource.Read(e.Data, e.Offset, e.ByteCount);
 

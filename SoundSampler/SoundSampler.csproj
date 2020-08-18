@@ -133,6 +133,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Known Issues.txt" />
+    <Content Include="ReadMe.txt" />
+    <None Include="SoundSamplerON.png" />
+    <None Include="SoundSamplerOFF.png" />
     <None Include="SoundSampler_TemporaryKey.pfx" />
     <None Include="ToDo" />
   </ItemGroup>

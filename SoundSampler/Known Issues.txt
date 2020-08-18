@@ -1,2 +1,2 @@
-﻿1. Null values when setting calculations beyond 65Hz
+﻿1. Null values when setting calculations beyond 65Hz (framework too slow for that?)
 2. Seen as threat by system
