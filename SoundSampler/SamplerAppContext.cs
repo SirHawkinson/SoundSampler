@@ -29,7 +29,6 @@ namespace SoundSampler
 
         // Set the program as disabled and COMPort as null by default
         private Boolean enabled = false;
-        private Boolean error = false;
         private string selectedPort;
 
         /*
@@ -84,7 +83,6 @@ namespace SoundSampler
             {
                 MessageBox.Show("No connected USB device detected. SoundSampler will shutdown.",
                                 "No available ports detected.", MessageBoxButtons.OK);
-                error = true;
                 return null;
                 
             }
