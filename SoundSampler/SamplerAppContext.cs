@@ -30,7 +30,6 @@ namespace SoundSampler
         // Set the program as disabled and COMPort as null by default
         private Boolean enabled = false;
         private string selectedPort;
-
         /*
          * Set up the application. Configures the main app handler, creates and initializes the
          * systray icon and its context menu, and makes the icon visible.
