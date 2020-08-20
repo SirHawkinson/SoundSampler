@@ -27,8 +27,9 @@ namespace SoundSampler
         private NotifyIcon systrayIcon;
         private SamplerApp SoundSampler;
 
-        // Master enabled state
+        // Set the program as disabled and COMPort as null by default
         private Boolean enabled = false;
+        private Boolean error = false;
         private string selectedPort;
 
         /*
@@ -39,10 +40,9 @@ namespace SoundSampler
         {
             SoundSampler = new SamplerApp();
             selectedPort = null;
-            MenuItem COMList = new MenuItem("COM List");
-            COMlist().ForEach(COM => COMList.MenuItems.Add(
-                    new MenuItem(COM, (s, e) => SetCOMPort(s, COM.ToString()))));
 
+            MenuItem COMList = new MenuItem("COM List");
+            COMlist().ForEach(COM => COMList.MenuItems.Add(new MenuItem(COM, (s, e) => SetCOMPort(s, COM.ToString()))));
             systrayIcon = new NotifyIcon();
 
             systrayIcon.ContextMenu = new ContextMenu(new MenuItem[] {
@@ -54,7 +54,7 @@ namespace SoundSampler
                     new MenuItem("Full (400Hz)", (s, e) => UpdateSpeed_Click(s, Veryfast_MS)),
                     new MenuItem("Exp (1000Hz)", (s, e) => UpdateSpeed_Click(s, Exp_MS)), // By the time making this program I didn't own a 1kHz refresh rate led strip, so not quite sure how it would behave
                 }),
-                new MenuItem("Exit SpectrumLED", OnApplicationExit)
+                new MenuItem("Exit SoundSampler", OnApplicationExit)
             });
 
             systrayIcon.ContextMenu.MenuItems[0].MenuItems[0].Checked = false;
@@ -79,10 +79,20 @@ namespace SoundSampler
         // Get a list of serial port names
         private List<string> COMlist()
         {
-
             string[] ports = SerialPort.GetPortNames();
-            List<string> list = ports.ToList();
-            return list;
+            if (ports.Length == 0)
+            {
+                MessageBox.Show("No connected USB device detected. SoundSampler will shutdown.",
+                                "No available ports detected.", MessageBoxButtons.OK);
+                error = true;
+                return null;
+                
+            }
+            else
+            {
+                List<string> list = ports.ToList();
+                return list;
+            }
         }
 
         // Select COM port
@@ -134,7 +144,5 @@ namespace SoundSampler
                 child.Checked = child == me;
             }
         }
-
-        // Exceptions handling
     }   
 }

@@ -10,14 +10,14 @@ namespace SoundSampler
         *  mostly-mid-ranged values. Reduce the maximum ever seen with each tick so giant spikes
         *  don't make the pretty colors disappear
         */
-        const float MAX_ENTROPY = 0.999f;
+        public const float entropy = 0.999f;
         float maxSeenEver = 0;
-        int Height = 100;
+        int height = 100;
        
         /*
         * Handling of raw (massaged) FFT'ed spectrum data. 
         */
-        public void DataSend(float[] raw)
+        public void SendData(float[] raw)
         {
             float[] normalized = Normalize(raw);
             int filtered = Filter(normalized);
@@ -54,11 +54,11 @@ namespace SoundSampler
 
            for (int i = 0; i < raw.Length; i++)
              {
-                normalized[i] = raw[i] / maxSeenEver * Height;
+                normalized[i] = raw[i] / maxSeenEver * height;
              }
 
         // Slowly decrease maxEverSeen to keep things normalizing after a giant spike
-        maxSeenEver *= MAX_ENTROPY;
+        maxSeenEver *= entropy;
             return normalized;
         }
     }

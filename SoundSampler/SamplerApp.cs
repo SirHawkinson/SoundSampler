@@ -4,7 +4,6 @@ using CSCore.Streams;
 using System;
 using System.Timers;
 using System.IO.Ports;
-using System.Windows.Forms;
 
 namespace SoundSampler
 {
@@ -13,8 +12,8 @@ namespace SoundSampler
      */
     public class SamplerApp
     {
-        //Serial ports initialization variables
-        static SerialPort _serialPort;
+        // Serial ports initialization variables
+        static SerialPort serialPort;
         private string Port;
         private int baud;
 
@@ -22,7 +21,7 @@ namespace SoundSampler
         private System.Timers.Timer ticker;
 
         // CSCore classes that read the WASAPI data and pass it to the SampleHandler
-        private WasapiCapture capture;
+        private WasapiCapture wasapiCapture;
         private SingleBlockNotificationStream notificationSource;
         private IWaveSource finalSource;
 
@@ -35,7 +34,7 @@ namespace SoundSampler
          */
         public SamplerApp()
         {
-            // Init the timer
+            // Init the timer, there's a conflict between two libraries on which one to use for Times, hence the class clarification
             ticker = new System.Timers.Timer(SamplerAppContext.Veryfast_MS);
             ticker.Elapsed += Tick;
 
@@ -53,10 +52,10 @@ namespace SoundSampler
         {
             if (enabled)
             {
-                    _serialPort = new SerialPort(Port, baud);
-                    _serialPort.ReadTimeout = 250;
-                    _serialPort.WriteTimeout = 250;
-                    _serialPort.Open();
+                    serialPort = new SerialPort(Port, baud);
+                    serialPort.ReadTimeout = 250;
+                    serialPort.WriteTimeout = 250;
+                    serialPort.Open();
                     StartCapture();
                     ticker.Start();
             }
@@ -66,10 +65,10 @@ namespace SoundSampler
 
                 // Send zero bit through port, this will force LEDs to blackout
                 byte[] end =BitConverter.GetBytes(0);
-                _serialPort.Write(end, 0, 1);
-                if (_serialPort.IsOpen == true)
+                serialPort.Write(end, 0, 1);
+                if (serialPort.IsOpen == true)
                 {
-                    _serialPort.Close();
+                    serialPort.Close();
                 }
                 ticker.Stop();
                 
@@ -80,7 +79,7 @@ namespace SoundSampler
         public void COMSend(int data)
         {
             byte[] b = BitConverter.GetBytes(data);
-            _serialPort.Write(b, 0, 1);
+            serialPort.Write(b, 0, 1);
         }
 
         /*
@@ -88,11 +87,10 @@ namespace SoundSampler
          */
         public void UpdateTickSpeed(double intervalMs)
         {
-            // No need to stop/start, setting Interval does that
             ticker.Interval = intervalMs;
         }
 
-        // Initiate a new COM port and open it
+        // Overwrite the default null COMPort
         public void Selected_COMPort(string COMPort)
         {
             Port = COMPort;
@@ -100,7 +98,7 @@ namespace SoundSampler
 
         /*
          * Disable the program upon shutting down to clear data and close ports without having to pause the program beforehand.
-         * Dirty, but couldn't think of anything else.
+         * With no exception catching the program would throw an error upon shutting it down. Gotta love the try-catch.
          */
         public void Shutdown(object sender, EventArgs e)
         {
@@ -124,30 +122,29 @@ namespace SoundSampler
             // Get the FFT results and send to Handler
             float[] values = SampleHandler.GetSpectrumValues();
            
-                Handler.DataSend(values);
+                Handler.SendData(values);
         }
 
         /*
-         * Begin audio capture. Connects to WASAPI, initializes the sample handler, and begins
-         * sending captured data to it.
+         * Initializes WASAPI, initializes the sample handler, and sends captured data to it.
          */
         private void StartCapture()
         {
             // Initialize hardware capture
-            capture = new WasapiLoopbackCapture(10);
-            capture.Initialize();
+            wasapiCapture = new WasapiLoopbackCapture(10);
+            wasapiCapture.Initialize();
 
             // Initialize sample handler
-            SampleHandler = new SampleHandler(capture.WaveFormat.Channels, capture.WaveFormat.SampleRate);
+            SampleHandler = new SampleHandler(wasapiCapture.WaveFormat.Channels, wasapiCapture.WaveFormat.SampleRate);
 
             // Configure per-block reads rather than per-sample reads
-            notificationSource = new SingleBlockNotificationStream(new SoundInSource(capture).ToSampleSource());
+            notificationSource = new SingleBlockNotificationStream(new SoundInSource(wasapiCapture).ToSampleSource());
             notificationSource.SingleBlockRead += (s, e) => SampleHandler.Add(e.Left, e.Right);
             finalSource = notificationSource.ToWaveSource();
-            capture.DataAvailable += (s, e) => finalSource.Read(e.Data, e.Offset, e.ByteCount);
+            wasapiCapture.DataAvailable += (s, e) => finalSource.Read(e.Data, e.Offset, e.ByteCount);
 
             // Start capture
-            capture.Start();
+            wasapiCapture.Start();
         }
 
         /*
@@ -155,13 +152,13 @@ namespace SoundSampler
          */
         private void StopCapture()
         {
-            if (capture.RecordingState == RecordingState.Recording)
+            if (wasapiCapture.RecordingState == RecordingState.Recording)
             {
-                capture.Stop();
+                wasapiCapture.Stop();
 
                 finalSource.Dispose();
                 notificationSource.Dispose();
-                capture.Dispose();
+                wasapiCapture.Dispose();
 
                 SampleHandler = null;
             }

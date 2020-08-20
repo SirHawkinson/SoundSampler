@@ -8,30 +8,30 @@ namespace SoundSampler
     {
 
         // Basic FFT constants
-        const FftSize FFT_SIZE = FftSize.Fft4096;
-        const int FFT_SIZE_INT = (int)FFT_SIZE;
-        const int MAX_FFT_IDX = FFT_SIZE_INT / 2 - 1;
-        const int MIN_FREQ = 20;
-        const int MAX_FREQ = 16000;
+        const FftSize fftSize = FftSize.Fft4096;
+        const int fftSizeInt = (int)fftSize;
+        const int maxFftIdx = fftSizeInt / 2 - 1;
+        const int minFreq = 20;
+        const int maxFreq = 16000;
 
         /* The weight given to the previous sample for time-based smoothing. High value works great when 
          * sending it to the LED strip ewhen the software is set to a high refresh rate, making the 
          * transition between values much milder, lower values increase accuracy of sampling.
          * Setting it too low on a high refreshed stripe introduces VERY annoying flicker. 
          */
-        const float SMOOTHING = 0.85f;
+        const float smoothing = 0.85f;
 
         // Drop the index to 0 if below this threshold. Helps prevent lingering color after sound
         // has stopped
-        const float MIN_THRESHOLD = 0.001f;
+        const float minThreshold = 0.001f;
 
         /* 
          * The number of index points to take from the raw FFT data. Number of columns corresponds
          * with a standard 10 bands equalizers
          */
 
-        public const int NUM_COLS = 10;
-        public const int NUM_IDXS = NUM_COLS + 1; 
+        public const int columns = 10;
+        public const int indexes = columns + 1; 
 
         // FFT fields for CSCore FFT
         FftProvider fftProvider;
@@ -40,7 +40,7 @@ namespace SoundSampler
         // FFT index fields
         int minFreqIdx;
         int maxFreqIdx;
-        int[] logFreqIdxs = new int[NUM_IDXS];
+        int[] logFreqIdxs = new int[indexes];
 
         /*
          * Initialize the SampleHandler with the number of audio channels and the sample rate
@@ -48,18 +48,18 @@ namespace SoundSampler
          */
 
         // Previous-sample spectrum data, used for smoothing out the output
-        float[] prevSpectrumValues = new float[NUM_COLS];
+        float[] prevSpectrumValues = new float[columns];
 
         public SampleHandler(int channels, int sampleRate)
         {
 
-            fftProvider = new FftProvider(channels, FFT_SIZE);
-            fftBuf = new float[FFT_SIZE_INT];
+            fftProvider = new FftProvider(channels, fftSize);
+            fftBuf = new float[fftSizeInt];
 
             // Determine a log-based set of FFT indices
             double f = sampleRate / 2;
-            maxFreqIdx = Math.Min((int)(MAX_FREQ / f * FFT_SIZE_INT / 2) + 1, MAX_FFT_IDX);
-            minFreqIdx = Math.Min((int)(MIN_FREQ / f * FFT_SIZE_INT / 2), MAX_FFT_IDX);
+            maxFreqIdx = Math.Min((int)(maxFreq / f * fftSizeInt / 2) + 1, maxFftIdx);
+            minFreqIdx = Math.Min((int)(minFreq / f * fftSizeInt / 2), maxFreqIdx);
             int indexCount = maxFreqIdx - minFreqIdx;
 
             // Debug only
@@ -67,9 +67,9 @@ namespace SoundSampler
              *   + maxFreqIdx + "; index count=" + indexCount);
              */
 
-            for (int i = 0; i < NUM_IDXS; i++)
+            for (int i = 0; i < indexes; i++)
             {
-                logFreqIdxs[i] = (int)((1 - Math.Log(NUM_IDXS - i, NUM_IDXS)) * indexCount) + minFreqIdx;
+                logFreqIdxs[i] = (int)((1 - Math.Log(indexes - i, indexes)) * indexCount) + minFreqIdx;
             }
             // Debug only
             // Console.WriteLine(string.Join(" ", logFreqIdxs));
@@ -89,7 +89,7 @@ namespace SoundSampler
         public float[] GetSpectrumValues()
         {
 
-            // Check for no data coming through FFT and send nulls
+            // Check for no data coming through FFT and send nulls if true
             if (!fftProvider.IsNewDataAvailable)
             {
                 // Debug only
@@ -101,18 +101,18 @@ namespace SoundSampler
             // Do the FFT
             fftProvider.GetFftData(fftBuf);
             
-            // Set the number of frequency bands
-            float[] spectrumValues = new float[NUM_COLS];
-            for (int i = 0; i < NUM_COLS; i++)
+            // Assign  to frequency bands
+            float[] spectrumValues = new float[columns];
+            for (int i = 0; i < columns; i++)
             {
                 /* Find the max within each frequency band, then apply per-index scaling 
-                (to bring up the mid-high end) and a minimum threshold
-                */
+                 *(to bring up the mid-high end) and a minimum threshold
+                 */
                 int bandSize = logFreqIdxs[i + 1] - logFreqIdxs[i];
                 float max = new ArraySegment<float>(fftBuf, logFreqIdxs[i], bandSize).Max();
                 float Scaled = Math.Max((float)max, 0);
-                float smoothed = prevSpectrumValues[i] * SMOOTHING + Scaled * (1 - SMOOTHING);
-                spectrumValues[i] = smoothed < MIN_THRESHOLD ? 0 : smoothed;
+                float smoothed = prevSpectrumValues[i] * smoothing + Scaled * (1 - smoothing);
+                spectrumValues[i] = smoothed < minThreshold ? 0 : smoothed;
             }
 
             return prevSpectrumValues = spectrumValues;
