@@ -1,4 +1,4 @@
-Thank you for using my software!
+Thank you for using my software! If you like my program, please consider a small donation to my PayPal: polishsirhawk@gmail.com.
 
 This file contains basic control for the program, including handling Arduino code. You require .NET Framework 4.7.2 to be able to use my program
 and FastLED library to upload Arduino code to your microcontroler.
@@ -24,3 +24,5 @@ Before uploading the code to your Arduino:
 if you were to change that PIN it must be a PWM pin, which you can check that in your device pinout;
 - Color is represented in RGB range, you have to input manually your desired color;
 - The code uses FastLED library, which has a great variety of control, albeit in this use case only the brightness control is used.
+
+
