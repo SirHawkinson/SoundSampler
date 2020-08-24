@@ -13,6 +13,6 @@ namespace SoundSampler
             SamplerAppContext app = new SamplerAppContext();
             Application.ApplicationExit += app.OnApplicationExit;
             Application.Run(app);
-        }
+        }   
     }
 }

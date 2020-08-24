@@ -29,6 +29,13 @@ namespace SoundSampler
         private SampleHandler SampleHandler;
         private Handler Handler;
 
+        // Declaration of a switch for swapping between 3-columns and octave audio handling, by default it will 
+        // use octaves to analyze sound.
+        public Boolean bassBased;
+
+        // Column assigning method, by default it gives "octaves" assigning.
+        string method = "octaves";
+
         /*
          * Basic initialization. No audio is read until SetEnable(true) is called.
          */
@@ -96,6 +103,10 @@ namespace SoundSampler
             Port = COMPort;
         }
 
+        public void Selected_Method(string calcMethod)
+        {
+            method = calcMethod;
+        }
         /*
          * Disable the program upon shutting down to clear data and close ports without having to pause the program beforehand.
          * With no exception catching the program would throw an error upon shutting it down. Gotta love the try-catch.
@@ -106,7 +117,7 @@ namespace SoundSampler
             {
                 SetEnabled(false);
             }
-            catch (Exception exc)
+            catch (Exception)
             {
                 
                 
@@ -119,10 +130,10 @@ namespace SoundSampler
          */
         private void Tick(object sender, ElapsedEventArgs e)
         {
-            // Get the FFT results and send to Handler
-            float[] values = SampleHandler.GetSpectrumValues();
+            // Get the FFT results and send to Handler with method as a results handling variable.
+            float[] values = SampleHandler.GetSpectrumValues(method);
            
-                Handler.SendData(values);
+                Handler.SendData(values, bassBased);
         }
 
         /*
