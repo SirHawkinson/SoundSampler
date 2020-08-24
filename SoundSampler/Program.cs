@@ -7,7 +7,7 @@ namespace SoundSampler
     {
         static void Main()
         {
-            // Based on https://github.com/glowboy/SpectrumLED
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             SamplerAppContext app = new SamplerAppContext();

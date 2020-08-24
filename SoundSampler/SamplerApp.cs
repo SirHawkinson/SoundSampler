@@ -34,7 +34,7 @@ namespace SoundSampler
         public Boolean bassBased;
 
         // Column assigning method, by default it gives "octaves" assigning.
-        string method = "octaves";
+        public string method = "octaves";
 
         /*
          * Basic initialization. No audio is read until SetEnable(true) is called.
@@ -133,7 +133,7 @@ namespace SoundSampler
             // Get the FFT results and send to Handler with method as a results handling variable.
             float[] values = SampleHandler.GetSpectrumValues(method);
            
-                Handler.SendData(values, bassBased);
+                Handler.SendData(values, bassBased,method);
         }
 
         /*

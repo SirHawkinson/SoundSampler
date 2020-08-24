@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using System.IO.Ports;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms.DataVisualization.Charting;
 
 namespace SoundSampler
 {
@@ -23,8 +22,12 @@ namespace SoundSampler
         public const double Fast_MS = 1000 / 120.0;
         public const double Veryfast_MS = 1000 / 400.0;
         public const double Exp_MS = 1000 / 1000.0;
+
+        /*
+        //Legacy method.
         public string bassHandling = "bass";
         public string octavesHandling = "octaves";
+        */
 
         // The systray icon and main app control.
         private NotifyIcon systrayIcon;
@@ -59,16 +62,16 @@ namespace SoundSampler
                     // so not quite sure how it would behave. Code also seem to generate nulls when exceeding 65Hz.
                 }),
                 new MenuItem("Sound columns", new MenuItem[]{
-                    // No fking clue if that's a bad idea to implement a boolean here.
+                    // No fking clue if that's a bad idea to implement a boolean here, seems to work fine.
                     new MenuItem("Bass", (s,e) => AudioRange_Handling(s,true)),
                     new MenuItem("Octaves", (s,e) => AudioRange_Handling(s,false)),
                     }),
+                /* Legacy method.
                 new MenuItem("Sound handling", new MenuItem[]{
-                    // No fking clue if that's a bad idea to implement a boolean here.
                     new MenuItem("Bass based calculations", (s,e) => AudioCalculations_Method(s,bassHandling)),
                     new MenuItem("Octaves basec calculations", (s,e) => AudioCalculations_Method(s,octavesHandling)),
                     }),
-
+                */
                 new MenuItem("Exit SoundSampler", OnApplicationExit)
             });
 
@@ -76,6 +79,7 @@ namespace SoundSampler
             systrayIcon.ContextMenu.MenuItems[0].MenuItems[0].Checked = false;
             systrayIcon.ContextMenu.MenuItems[1].MenuItems[3].Checked = true;
             systrayIcon.ContextMenu.MenuItems[2].MenuItems[1].Checked = true;
+            // systrayIcon.ContextMenu.MenuItems[3].MenuItems[1].Checked = true; Legacy method.
             systrayIcon.MouseClick += SystrayIcon_Click;
             systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerOFF.GetHicon());
             systrayIcon.Text = "SoundSampler";
@@ -101,8 +105,7 @@ namespace SoundSampler
             {
                 MessageBox.Show("No connected USB device detected. SoundSampler will shutdown.",
                                 "No available ports detected.", MessageBoxButtons.OK);
-                return null;
-                
+                return null;                
             }
             else
             {
@@ -126,6 +129,8 @@ namespace SoundSampler
         {
             if (e.Button == MouseButtons.Left)
             {
+
+                // No device selected handling
                 if (selectedPort == null)
                 {
                     MessageBox.Show("Please select a port.",
@@ -134,14 +139,16 @@ namespace SoundSampler
                 else
                 {
                     enabled = !enabled;
+
+                    // Icon switching
                     if (enabled == true)
                         systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerON.GetHicon());
                     else
                         systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerOFF.GetHicon());
+
                     SamplerApp.SetEnabled(enabled);
                 }
-            }
-            
+            }            
         }
 
         /*
@@ -156,15 +163,18 @@ namespace SoundSampler
         // Set audio handling.
         private void AudioRange_Handling(object sender, bool Bass)
         {
-            CheckMeAndUncheckSiblings((MenuItem)sender);
+            CheckMeAndUncheckSiblings((MenuItem)sender);            
             SamplerApp.bassBased = Bass;
         }
 
+        /* Legacy method.
         private void AudioCalculations_Method(object sender, string method)
         {
             CheckMeAndUncheckSiblings((MenuItem)sender);
             SamplerApp.Selected_Method(method);
         }
+        */
+
         // Deactivate other list options after pressing one.
         private void CheckMeAndUncheckSiblings(MenuItem me)
         {
@@ -175,3 +185,4 @@ namespace SoundSampler
         }
     }   
 }
+ 
