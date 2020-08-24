@@ -17,13 +17,13 @@ namespace SoundSampler
         * Handling of raw (massaged) FFT'ed spectrum data. 
         */
        
-        public void SendData(float[] raw, bool bassBased)
+        public void SendData(float[] raw)
         {
-            float[] normalized = Normalize(raw, bassBased);
+            float[] normalized = Normalize(raw);
             int filtered = Filter(normalized);
             // Atrocious, but real-time debug only
-            Console.WriteLine(string.Join(" Handler ", normalized));
-            Console.WriteLine("Normalized: " + filtered);
+            // Console.WriteLine(string.Join(" Handler ", normalized));
+            // Console.WriteLine("Normalized: " + filtered);
 
             // Send filtered column to COM
             SamplerApp samp = new SamplerApp();
@@ -43,34 +43,9 @@ namespace SoundSampler
         * Normalize the raw data into values between 0 and the something. The max value is subject to entropy so large spikes don't
         * ruin the cool.
         */
-        private float[] Normalize(float[] raw, bool bass)
+        private float[] Normalize(float[] raw)
         {
-            
-            // Apply 3-column normalization
-            if (bass == true) 
-        {                
-            int bassBasedColumns = 3;
-            float[] normalized = new float[bassBasedColumns];
-
-            // Use maxSeenEver to normalize the range into 0-Height
-            maxSeenEver = Math.Max(raw.Max(), maxSeenEver);
-
-            for (int i = 0; i < bassBasedColumns; i++)
-            {
-                normalized[i] = raw[i] / maxSeenEver * height;
-            }
-            maxSeenEver *= entropy;
-                Console.WriteLine("MaxSeen in method "+ maxSeenEver);
-            return normalized;
-        }
-
-            // Apply octaves based normalization
-        else
-        {
-                // Switching between modes handling, so it won't decrease from typical value of 2.3 for octaves. Leaving it unhandled
-                // creates a ground level output.
-                
-                float[] normalized = new float[raw.Length];
+            float[] normalized = new float[raw.Length];
 
               // Use maxSeenEver to normalize the range into 0-Height
             maxSeenEver = Math.Max(raw.Max(), maxSeenEver);
@@ -79,12 +54,13 @@ namespace SoundSampler
                 {
                     normalized[i] = raw[i] / maxSeenEver * height;
                 }
+            // Slowly decrease maxEverSeen to keep things normalizing after a giant spike
             maxSeenEver *= entropy;
             return normalized;
-            }
-            // Slowly decrease maxEverSeen to keep things normalizing after a giant spike
-            
         }
+           
+            
+        
 
         // Apply corrector, will be used once I get a new LED stripe.
 

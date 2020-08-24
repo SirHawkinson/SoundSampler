@@ -1,6 +1,5 @@
 ﻿using CSCore.DSP;
 using System;
-//  using System.Linq;
 using System.Collections.Generic;
 
 namespace SoundSampler
@@ -15,12 +14,6 @@ namespace SoundSampler
         const FftSize fftSize = FftSize.Fft2048;
         const int fftSizeInt = (int)fftSize;
 
-        // Legacy method.
-        /*
-         const int maxFftIdx = fftSizeInt / 2 - 1;
-        const int minFreq = 20;
-        const int maxFreq = 16000;
-        */
 
         /* The weight given to the previous sample for time-based smoothing. High value works great when 
          * sending it to the LED strip ewhen the software is set to a high refresh rate, making the 
@@ -45,22 +38,14 @@ namespace SoundSampler
         FftProvider fftProvider;
         float[] fftBuf;
 
-        /*
-        // FFT index fields. Legacy method.
-        int minFreqIdx;
-        int maxFreqIdx;
-        int[] logFreqIdxs = new int[indexes];
-        */
+        // Previous-sample spectrum data, used for smoothing out the output.
+        float[] prevSpectrumValues = new float[columns];
 
         /*
          * Initialize the SampleHandler with the number of audio channels and the sample rate
          * taken from system config.
          */
-
-        // Previous-sample spectrum data, used for smoothing out the output.
-        float[] prevSpectrumValues = new float[columns];
-
-        public SampleHandler(int channels, int sampleRate)
+        public SampleHandler(int channels)
         {
             // Setup an FFT data provider with number of channels taken from system audio settings, buffer size and
             // a list of FFT results assigned.
@@ -68,18 +53,6 @@ namespace SoundSampler
             fftProvider = new FftProvider(channels, fftSize);
             fftBuf = new float[fftSizeInt];
             _spectrumData = new List<float>();
-            /*
-                // Determine a log-based set of FFT indices. Legacy method.
-                double f = sampleRate / 2;
-                maxFreqIdx = Math.Min((int)(maxFreq / f * fftSizeInt / 2) + 1, maxFftIdx);
-                minFreqIdx = Math.Min((int)(minFreq / f * fftSizeInt / 2), maxFreqIdx);
-                int indexCount = maxFreqIdx - minFreqIdx;
-
-                for (int i = 0; i < indexes; i++)
-                {
-                    logFreqIdxs[i] = (int)((1 - Math.Log(indexes - i, indexes)) * indexCount) + minFreqIdx;
-                }
-            */
         }
 
         /*
@@ -93,14 +66,12 @@ namespace SoundSampler
         /*
          Get the current array of sample data by running the FFT and massaging the output. 
         */ 
-        public float[] GetSpectrumValues(string method)
+        public float[] GetSpectrumValues()
         {
 
             // Check for no data coming through FFT and send nulls if true
             if (!fftProvider.IsNewDataAvailable)
             {
-                // Real-time debug only
-                // Console.WriteLine("no new data available");
                 return null;
             }
 
@@ -112,28 +83,9 @@ namespace SoundSampler
             // Assign to frequency bands
             float[] spectrumValues = new float[columns];
 
-            // Column assigning method, by default it will do the "octave" assigning. Seems like this method must be ran right after WASAPI
-            // initialization, else it has a ground level output. Left as a legacy method as it's still fun.
-           /*
-            if (method == "bass") 
-            {                
-                for (int i = 0; i < columns; i++)
-                 {
-                    // Mostly bass detection, most likely borked tremendously but still gives interesting results. Or just how strong bass 
-                    // frequency is, as a signal (Eiffle tower sized doubts). Based on https://github.com/glowboy/SpectrumLED
-
-                 int bandSize = logFreqIdxs[i + 1] - logFreqIdxs[i];
-                 float max = new ArraySegment<float>(fftBuf, logFreqIdxs[i], bandSize).Max();
-                 float Scaled = Math.Max((float)max, 0);
-                 float smoothed = prevSpectrumValues[i] * smoothing + Scaled * (1 - smoothing);
-                 spectrumValues[i] = smoothed < minThreshold ? 0 : smoothed;
-                 }
-            }
-           
             // This assigns results kind of properly to 10-band octaves but still have ginormous leakage when presented 
             // with a single frequency. Taken from a bass_wasapi sample.
-            else
-           */
+            
             {
                 int spectrumColumn, peak;
                 int indexTick = 0;
