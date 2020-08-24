@@ -84,7 +84,7 @@ namespace SoundSampler
             float[] spectrumValues = new float[columns];
 
             // This assigns results kind of properly to 10-band octaves but still have ginormous leakage when presented 
-            // with a single frequency. Taken from a bass_wasapi sample.
+            // with a single frequency. Code taken from https://github.com/m4r1vs/Audioly.
             
             {
                 int spectrumColumn, peak;
