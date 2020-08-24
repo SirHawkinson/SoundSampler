@@ -133,7 +133,7 @@ namespace SoundSampler
             // Get the FFT results and send to Handler with method as a results handling variable.
             float[] values = SampleHandler.GetSpectrumValues(method);
            
-                Handler.SendData(values, bassBased,method);
+                Handler.SendData(values, bassBased);
         }
 
         /*

@@ -17,14 +17,13 @@ namespace SoundSampler
         * Handling of raw (massaged) FFT'ed spectrum data. 
         */
        
-        public void SendData(float[] raw, bool bassBased, string method)
+        public void SendData(float[] raw, bool bassBased)
         {
-            float[] normalized = Normalize(raw, bassBased, method);
+            float[] normalized = Normalize(raw, bassBased);
             int filtered = Filter(normalized);
             // Atrocious, but real-time debug only
             Console.WriteLine(string.Join(" Handler ", normalized));
             Console.WriteLine("Normalized: " + filtered);
-            Console.WriteLine("Max seen" + maxSeenEver);
 
             // Send filtered column to COM
             SamplerApp samp = new SamplerApp();
@@ -44,7 +43,7 @@ namespace SoundSampler
         * Normalize the raw data into values between 0 and the something. The max value is subject to entropy so large spikes don't
         * ruin the cool.
         */
-        private float[] Normalize(float[] raw, bool bass, string method)
+        private float[] Normalize(float[] raw, bool bass)
         {
             
             // Apply 3-column normalization

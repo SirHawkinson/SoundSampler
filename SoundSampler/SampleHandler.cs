@@ -16,9 +16,11 @@ namespace SoundSampler
         const int fftSizeInt = (int)fftSize;
 
         // Legacy method.
-        const int maxFftIdx = fftSizeInt / 2 - 1;
+        /*
+         const int maxFftIdx = fftSizeInt / 2 - 1;
         const int minFreq = 20;
         const int maxFreq = 16000;
+        */
 
         /* The weight given to the previous sample for time-based smoothing. High value works great when 
          * sending it to the LED strip ewhen the software is set to a high refresh rate, making the 
@@ -149,7 +151,7 @@ namespace SoundSampler
                                 if (max < fftBuf[1 + indexTick])
                                     max = fftBuf[1 + indexTick];
                             }
-                        peak = (int)(Math.Sqrt(max) * 10);
+                        peak = (int)(Math.Sqrt(max) * 8);
 
                                 // Peak exceeding 0-100 handling.
                             if (peak > 100) peak = 100;
@@ -167,7 +169,6 @@ namespace SoundSampler
                         catch (Exception)
                         {
                         }
-
                  }
             }
 
@@ -176,8 +177,7 @@ namespace SoundSampler
 
             // Clear the _spectrumData from any previous results, for new FFT data.
             _spectrumData.Clear();
-            return prevSpectrumValues = spectrumValues;
-           
+            return prevSpectrumValues = spectrumValues;           
         }
     }
 }
