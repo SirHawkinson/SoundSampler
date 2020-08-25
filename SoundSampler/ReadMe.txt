@@ -1,7 +1,7 @@
 Thank you for using my software! If you like my program, please consider a small donation to my PayPal: polishsirhawk@gmail.com.
 
 This file contains basic control for the program, including handling Arduino code. You require .NET Framework 4.7.2 to be able to use my program
-and FastLED library to upload Arduino code to your microcontroler.
+and FastLED library (https://github.com/FastLED/FastLED) to upload Arduino code to your microcontroler.
 
 SoundSampler is an ultra light program that uses WASAPI to capture the sound directly from operating system, this bypasses the need for any 
 extra sound source or mixing. Through CSCore library the sound data is processed with Fast Fourier Transform (FFT), sorted into 10 columns 
@@ -10,14 +10,13 @@ nothing else, which was the principle while making SoundSampler.
 
 How to use:
 
-SamplerApp (customizable version)
-- When launched, the program will show up as an icon in the tray menu. If there is no USB device available connected, you will be greeted with an appropriate message;
-- Press right mouse button to open context menu;
-- In context menu you have to select COM port to send the data to, you can then select program calculation frequency, choose which columns to analyze (first 3 spectrum columns, so bass or 10 octaves) or to shut it dowm;
-- Press left mouse button on the program tray icon to start/stop the program.
+Download the release version you're interested in, put the 3 files (CSCore.dll, CSCore.xml [not necessary], SoundSampler.exe) in one folder and double click on the executable.
 
 SamplerApp (Light version)
-- Same as above, except it always analyze 10 octaves.
+- When launched, the program will show up as an icon in the tray menu. If there is no USB device available connected, you will be greeted with an appropriate message;
+- Press right mouse button to open context menu;
+- In context menu you have to select COM port to send the data to, and the speed of calculation;
+- Press left mouse button on the program tray icon to start/stop the program.
 
 Before uploading the code to your Arduino:
 - Change the NUM_LEDS number to a number of LEDs you are about to drive;
