@@ -1,7 +1,7 @@
 Thank you for using my software! If you like my program, please consider a small donation to my PayPal: polishsirhawk@gmail.com.
 
 This file contains basic control for the program, including handling Arduino code. You require .NET Framework 4.7.2 to be able to use my program
-and FastLED library to upload Arduino code to your microcontroler.
+and FastLED library (https://github.com/FastLED/FastLED) to upload Arduino code to your microcontroler.
 
 SoundSampler is an ultra light program that uses WASAPI to capture the sound directly from operating system, this bypasses the need for any 
 extra sound source or mixing. Through CSCore library the sound data is processed with Fast Fourier Transform (FFT), sorted into 10 columns 
