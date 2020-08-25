@@ -11,6 +11,7 @@ nothing else, which was the principle while making SoundSampler.
 How to use:
 
 SamplerApp (customizable version)
+- When launched, the program will show up as an icon in the tray menu. If there is no USB device available connected, you will be greeted with an appropriate message;
 - Press right mouse button to open context menu;
 - In context menu you have to select COM port to send the data to, you can then select program calculation frequency, choose which columns to analyze (first 3 spectrum columns, so bass or 10 octaves) or to shut it dowm;
 - Press left mouse button on the program tray icon to start/stop the program.
@@ -24,5 +25,3 @@ Before uploading the code to your Arduino:
 if you were to change that PIN it must be a PWM pin, which you can check that in your device pinout;
 - Color is represented in RGB range, you have to input manually your desired color;
 - The code uses FastLED library, which has a great variety of control, albeit in this use case only the brightness control is used.
-
-
