@@ -1,4 +1,5 @@
-﻿1. Optional correctors to audio columns respecting human ear sensitivity to certain sound frequencies - swappable between corrected and raw audio spectrum - somehow done
+﻿1. Optional correctors to audio columns respecting human ear sensitivity to certain sound frequencies - swappable between corrected and raw audio spectrum - octaves part done
 2. Colour selection, further sent to arduino(?)
-3. Settings remembering
-4. For further evaluation...
+3. --- Fix threat detection ---
+4. Preamp control (fixed tune up)
+5. Arduino code examples for adding more LEDs from another pin
