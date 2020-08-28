@@ -1,3 +1,7 @@
-﻿1. Doesn't react to "low" output, which isn't really low
-2. Can be seen as a threat by SmartScreen - Ain't nobody can fix it
-3. Using an EQ? - you're feked up.
+﻿1. Optional correctors to audio columns respecting human ear sensitivity to certain sound frequencies - swappable between corrected and raw audio spectrum - octaves part done
+2. Colour selection, further sent to arduino(?)
+4. Bass boost switch/control
+5. Smoothness control
+6. --- Fix threat detection ---
+7. Preamp control
+8. Arduino code examples for more devices

@@ -4,7 +4,6 @@ using CSCore.Streams;
 using System;
 using System.Timers;
 using System.IO.Ports;
-using System.Windows.Forms;
 
 namespace SoundSampler
 {
@@ -120,10 +119,7 @@ namespace SoundSampler
             Properties.Settings.Default.Save();
         }
 
-        private void App_Shutdown (object sender, FormClosingEventHandler e)
-        {
-
-        }
+       
         /*
          * Ticker callback handler. Performs the actual FFT, massages the data into raw spectrum
          * data, and sends it to handler.

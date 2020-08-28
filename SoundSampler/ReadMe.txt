@@ -6,7 +6,8 @@ and FastLED library (https://github.com/FastLED/FastLED) to upload Arduino code 
 SoundSampler is an ultra light program that uses WASAPI to capture the sound directly from operating system, this bypasses the need for any 
 extra sound source or mixing. Through CSCore library the sound data is processed with Fast Fourier Transform (FFT), sorted into 10 columns 
 representing regular 10 band frequency bars. Afterwards, the highest column is being selected and sent through selected USB port. It does 
-nothing else, which was the principle while making SoundSampler.
+nothing else, which was the principle while making SoundSampler. Any change you make in the current session is saved and carried over to the next one
+upon closing the application.
 
 How to use:
 
