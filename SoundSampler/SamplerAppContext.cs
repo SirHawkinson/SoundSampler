@@ -111,7 +111,6 @@ namespace SoundSampler
         // Select COM port to send data to.
         private void SetCOMPort(object sender, string port, int COMindex)
         {
-            Console.WriteLine(COMindex);
             CheckMeAndUncheckSiblings((MenuItem)sender);
             SamplerApp.Selected_COMPort(port);
             selectedPort = port;
