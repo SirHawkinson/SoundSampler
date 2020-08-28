@@ -27,6 +27,8 @@ namespace SoundSampler
         // Set the program as disabled and COMPort as null by default.
         private Boolean enabled = false;
         private string selectedPort;
+        private int portIndex = Properties.Settings.Default.portIndex;
+        private int updateSpeedIndex = Properties.Settings.Default.updateSpeedIndex;
 
         /*
          * Set up the application. Configures the main app handler, creates and initializes the
@@ -35,25 +37,25 @@ namespace SoundSampler
         public SamplerAppContext()
         {
             SamplerApp = new SamplerApp();
-            selectedPort = null;
+            this.selectedPort = Properties.Settings.Default.Port;
 
             MenuItem COMList = new MenuItem("COM List");
-            COMlist().ForEach(COM => COMList.MenuItems.Add(new MenuItem(COM, (s, e) => SetCOMPort(s, COM.ToString()))));
+            COMlist().ForEach(COM => COMList.MenuItems.Add(new MenuItem(COM, (s, e) => SetCOMPort(s, COM.ToString(), COMList.Index))));
             systrayIcon = new NotifyIcon();
 
             systrayIcon.ContextMenu = new ContextMenu(new MenuItem[] {
                 COMList,
                 new MenuItem("Update Speed", new MenuItem[] {
-                    new MenuItem("Full (400Hz)", (s, e) => UpdateSpeed_Click(s, Veryfast_MS)),
-                    new MenuItem("Exp (1000Hz)", (s, e) => UpdateSpeed_Click(s, Exp_MS)), // By the time making this program I didn't own a 1kHz refresh rate led strip, 
+                    new MenuItem("Full (400Hz)", (s, e) => UpdateSpeed_Click(s, Veryfast_MS, 0)),
+                    new MenuItem("Exp (1000Hz)", (s, e) => UpdateSpeed_Click(s, Exp_MS, 1)), // By the time making this program I didn't own a 1kHz refresh rate led strip, 
                     // so not quite sure how it would behave. Code also seem to generate nulls when exceeding 65Hz.
                 }),
                 new MenuItem("Exit SoundSampler", OnApplicationExit)
             });
 
             // Default options precheck.
-            systrayIcon.ContextMenu.MenuItems[0].MenuItems[0].Checked = false;
-            systrayIcon.ContextMenu.MenuItems[1].MenuItems[0].Checked = true;
+            systrayIcon.ContextMenu.MenuItems[0].MenuItems[portIndex].Checked = true;
+            systrayIcon.ContextMenu.MenuItems[1].MenuItems[updateSpeedIndex].Checked = true;
             systrayIcon.MouseClick += SystrayIcon_Click;
             systrayIcon.Icon = Icon.FromHandle(Resources.SoundSamplerOFF.GetHicon());
             systrayIcon.Text = "SoundSampler";
@@ -89,11 +91,13 @@ namespace SoundSampler
         }
 
         // Select COM port to send data to.
-        private void SetCOMPort(object sender, string port)
+        private void SetCOMPort(object sender, string port,int COMindex)
         {
             CheckMeAndUncheckSiblings((MenuItem)sender);
             SamplerApp.Selected_COMPort(port);
             selectedPort = port;
+            Properties.Settings.Default.Port = port;
+            Properties.Settings.Default.portIndex = COMindex;
         }
 
         /*
@@ -128,10 +132,12 @@ namespace SoundSampler
         /*
          * Speed options callback handler. Sets the tick/render speed in the app.
          */
-        private void UpdateSpeed_Click(object sender, double intervalMs)
+        private void UpdateSpeed_Click(object sender, double intervalMs, int intervalIndex)
         {
             CheckMeAndUncheckSiblings((MenuItem)sender);
             SamplerApp.UpdateTickSpeed(intervalMs);
+            Properties.Settings.Default.UpdateSpeed = intervalMs;
+            Properties.Settings.Default.updateSpeedIndex = intervalIndex;
         }
 
         // Deactivate other list options after pressing one.

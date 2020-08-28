@@ -20,11 +20,11 @@ namespace SoundSampler
          * transition between values much milder, lower values increase accuracy of sampling.
          * Setting it too low on a high refreshed stripe introduces VERY annoying flicker. 
          */
-        const float smoothing = 0.85f;
+        private double smoothing = (float)Properties.Settings.Default.smoothing;
 
         // Drop the index to 0 if below this threshold. Helps prevent lingering color after sound
         // has stopped.
-        const float minThreshold = 0.001f;
+        const double minThreshold = 0.001f;
 
         /* 
          * The number of index points to take from the raw FFT data. Number of columns corresponds
@@ -39,7 +39,7 @@ namespace SoundSampler
         float[] fftBuf;
 
         // Previous-sample spectrum data, used for smoothing out the output.
-        float[] prevSpectrumValues = new float[columns];
+        double[] prevSpectrumValues = new double[columns];
 
         /*
          * Initialize the SampleHandler with the number of audio channels and the sample rate
@@ -66,7 +66,7 @@ namespace SoundSampler
         /*
          Get the current array of sample data by running the FFT and massaging the output. 
         */ 
-        public float[] GetSpectrumValues()
+        public double[] GetSpectrumValues()
         {
 
             // Check for no data coming through FFT and send nulls if true
@@ -81,18 +81,18 @@ namespace SoundSampler
             fftProvider.GetFftData(fftBuf);
 
             // Assign to frequency bands
-            float[] spectrumValues = new float[columns];
+            double[] spectrumValues = new double[columns];
 
             // This assigns results kind of properly to 10-band octaves but still have ginormous leakage when presented 
-            // with a single frequency. Taken from a bass_wasapi sample.
-            
+            // with a single frequency. Code taken from https://github.com/m4r1vs/Audioly
+
             {
                 int spectrumColumn, peak;
                 int indexTick = 0;
                 int fftIdxs = 1023;
                 for (spectrumColumn = 0; spectrumColumn < columns; spectrumColumn++)
                 {
-                    float max = 0;
+                    double max = 0;
                     int Idxs = (int)Math.Pow(2, spectrumColumn * 10.0 / (columns - 1));
                             if (Idxs > fftIdxs)
                         Idxs = fftIdxs;
@@ -115,7 +115,7 @@ namespace SoundSampler
                  {
                         try
                         {
-                            float newSmoothed = prevSpectrumValues[i] * smoothing + _spectrumData[i] * (1 - smoothing);
+                        double newSmoothed = prevSpectrumValues[i] * smoothing + _spectrumData[i] * (1 - smoothing);
                             spectrumValues[i] = newSmoothed < minThreshold ? 0 : newSmoothed;
                         }
                         catch (Exception)

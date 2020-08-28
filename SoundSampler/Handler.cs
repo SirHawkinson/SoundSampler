@@ -9,17 +9,17 @@ namespace SoundSampler
         *  mostly-mid-ranged values. Reduce the maximum ever seen with each tick so giant spikes
         *  don't make the pretty colors disappear
         */
-        public const float entropy = 0.999f;
-        public float maxSeenEver = 0;
+        public double entropy = Properties.Settings.Default.entropy;
+        public double maxSeenEver = 0;
         int height = 100;
 
         /*
         * Handling of raw (massaged) FFT'ed spectrum data. 
         */
        
-        public void SendData(float[] raw)
+        public void SendData(double[] raw)
         {
-            float[] normalized = Normalize(raw);
+            double[] normalized = Normalize(raw);
             int filtered = Filter(normalized);
             // Atrocious, but real-time debug only
             // Console.WriteLine(string.Join(" Handler ", normalized));
@@ -33,7 +33,7 @@ namespace SoundSampler
         /*
          * Filter columns to get a highest column, rounded to integer
          */
-        private int Filter(float[] normalized)
+        private int Filter(double[] normalized)
         {
             return Convert.ToInt32(normalized.Max());
         }
@@ -43,9 +43,9 @@ namespace SoundSampler
         * Normalize the raw data into values between 0 and the something. The max value is subject to entropy so large spikes don't
         * ruin the cool.
         */
-        private float[] Normalize(float[] raw)
+        private double[] Normalize(double[] raw)
         {
-            float[] normalized = new float[raw.Length];
+            double[] normalized = new double[raw.Length];
 
               // Use maxSeenEver to normalize the range into 0-Height
             maxSeenEver = Math.Max(raw.Max(), maxSeenEver);

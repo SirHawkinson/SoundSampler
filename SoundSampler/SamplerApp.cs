@@ -29,21 +29,18 @@ namespace SoundSampler
         private SampleHandler SampleHandler;
         private Handler Handler;
 
-        // Declaration of a switch for swapping between 3-columns and octave audio handling, by default it will 
-        // use octaves to analyze sound.
-        public Boolean bassBased;
-
+      
         /*
          * Basic initialization. No audio is read until SetEnable(true) is called.
          */
         public SamplerApp()
         {
             // Init the timer, there's a conflict between two libraries on which one to use for Times, hence the class clarification
-            ticker = new System.Timers.Timer(SamplerAppContext.Veryfast_MS);
+            ticker = new System.Timers.Timer(Properties.Settings.Default.UpdateSpeed);
             ticker.Elapsed += Tick;
 
-            Port = null;
-            baud = 115200;
+            this.Port = Properties.Settings.Default.Port;
+            this.baud = Properties.Settings.Default.baud;
 
             // Create a handler
             Handler = new Handler();
@@ -114,6 +111,7 @@ namespace SoundSampler
             catch (Exception)
             {                
             }
+            Properties.Settings.Default.Save();
         }
 
         /*
@@ -123,7 +121,7 @@ namespace SoundSampler
         private void Tick(object sender, ElapsedEventArgs e)
         {
             // Get the FFT results and send to Handler with method as a results handling variable.
-            float[] values = SampleHandler.GetSpectrumValues();
+            double[] values = SampleHandler.GetSpectrumValues();
            
                 Handler.SendData(values);
         }
