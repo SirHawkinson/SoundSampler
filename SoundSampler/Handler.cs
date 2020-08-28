@@ -5,25 +5,26 @@ namespace SoundSampler
     public class Handler
     {
         /* 
-        *  During normalization, scale the FFT values by the maximum value seen to get nice,
-        *  mostly-mid-ranged values. Reduce the maximum ever seen with each tick so giant spikes
-        *  don't make the pretty colors disappear
+        *  During normalization, scale the FFT values by the maximum value seen for smooth
+        *  operation. Maximum value in current iteration gets multiplied by the entropy
+        *  value, so the transition with each tick is smooth.
         */
-        public const float entropy = 0.999f;
-        public float maxSeenEver = 0;
+        private double entropy = Properties.Settings.Default.entropy;
+        public double maxSeenEver = 0;
         int height = 100;
 
+        
         /*
         * Handling of raw (massaged) FFT'ed spectrum data. 
         */
-       
-        public void SendData(float[] raw, bool bassBased)
+
+        public void SendData(double[] raw, bool bassBased)
         {
-            float[] normalized = Normalize(raw, bassBased);
+            double[] normalized = Normalize(raw, bassBased);
             int filtered = Filter(normalized);
             // Atrocious, but real-time debug only
-            Console.WriteLine(string.Join(" Handler ", normalized));
-            Console.WriteLine("Normalized: " + filtered);
+            // Console.WriteLine(string.Join(" Handler ", normalized));
+            // Console.WriteLine("Normalized: " + filtered);
 
             // Send filtered column to COM
             SamplerApp samp = new SamplerApp();
@@ -33,7 +34,7 @@ namespace SoundSampler
         /*
          * Filter columns to get a highest column, rounded to integer
          */
-        private int Filter(float[] normalized)
+        private int Filter(double[] normalized)
         {
             return Convert.ToInt32(normalized.Max());
         }
@@ -43,34 +44,31 @@ namespace SoundSampler
         * Normalize the raw data into values between 0 and the something. The max value is subject to entropy so large spikes don't
         * ruin the cool.
         */
-        private float[] Normalize(float[] raw, bool bass)
+        private double[] Normalize(double[] raw, bool bass)
         {
             
             // Apply 3-column normalization
             if (bass == true) 
         {                
             int bassBasedColumns = 3;
-            float[] normalized = new float[bassBasedColumns];
+            double[] normalized = new double[bassBasedColumns];
 
-            // Use maxSeenEver to normalize the range into 0-Height
-            maxSeenEver = Math.Max(raw.Max(), maxSeenEver);
+                // Use maxSeenEver to normalize the range into 0-Height
+                maxSeenEver = (double)Math.Max(raw.Max(), maxSeenEver);
 
             for (int i = 0; i < bassBasedColumns; i++)
             {
                 normalized[i] = raw[i] / maxSeenEver * height;
             }
             maxSeenEver *= entropy;
-                Console.WriteLine("MaxSeen in method "+ maxSeenEver);
+                
             return normalized;
         }
 
             // Apply octaves based normalization
         else
         {
-                // Switching between modes handling, so it won't decrease from typical value of 2.3 for octaves. Leaving it unhandled
-                // creates a ground level output.
-                
-                float[] normalized = new float[raw.Length];
+                double[] normalized = new double[raw.Length];
 
               // Use maxSeenEver to normalize the range into 0-Height
             maxSeenEver = Math.Max(raw.Max(), maxSeenEver);

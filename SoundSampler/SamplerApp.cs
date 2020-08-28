@@ -4,6 +4,7 @@ using CSCore.Streams;
 using System;
 using System.Timers;
 using System.IO.Ports;
+using System.Windows.Forms;
 
 namespace SoundSampler
 {
@@ -12,6 +13,7 @@ namespace SoundSampler
      */
     public class SamplerApp
     {
+        
         // Serial ports initialization variables
         static SerialPort serialPort;
         private string Port;
@@ -33,20 +35,18 @@ namespace SoundSampler
         // use octaves to analyze sound.
         public Boolean bassBased;
 
-        // Column assigning method, by default it gives "octaves" assigning.
-        public string method = "octaves";
-
         /*
          * Basic initialization. No audio is read until SetEnable(true) is called.
          */
         public SamplerApp()
         {
             // Init the timer, there's a conflict between two libraries on which one to use for Times, hence the class clarification
-            ticker = new System.Timers.Timer(SamplerAppContext.Veryfast_MS);
+            ticker = new System.Timers.Timer(Properties.Settings.Default.UpdateSpeed);
             ticker.Elapsed += Tick;
 
-            Port = null;
-            baud = 115200;
+            this.Port = Properties.Settings.Default.Port;
+            this.baud = Properties.Settings.Default.baud;
+            this.bassBased = Properties.Settings.Default.bassBased;
 
             // Create a handler
             Handler = new Handler();
@@ -103,10 +103,7 @@ namespace SoundSampler
             Port = COMPort;
         }
 
-        public void Selected_Method(string calcMethod)
-        {
-            method = calcMethod;
-        }
+        
         /*
          * Disable the program upon shutting down to clear data and close ports without having to pause the program beforehand.
          * With no exception catching the program would throw an error upon shutting it down. Gotta love the try-catch.
@@ -119,11 +116,14 @@ namespace SoundSampler
             }
             catch (Exception)
             {
-                
-                
             }
+            Properties.Settings.Default.Save();
         }
 
+        private void App_Shutdown (object sender, FormClosingEventHandler e)
+        {
+
+        }
         /*
          * Ticker callback handler. Performs the actual FFT, massages the data into raw spectrum
          * data, and sends it to handler.
@@ -131,7 +131,7 @@ namespace SoundSampler
         private void Tick(object sender, ElapsedEventArgs e)
         {
             // Get the FFT results and send to Handler with method as a results handling variable.
-            float[] values = SampleHandler.GetSpectrumValues(method);
+            double[] values = SampleHandler.GetSpectrumValues();
            
                 Handler.SendData(values, bassBased);
         }
@@ -146,7 +146,7 @@ namespace SoundSampler
             wasapiCapture.Initialize();
 
             // Initialize sample handler
-            SampleHandler = new SampleHandler(wasapiCapture.WaveFormat.Channels, wasapiCapture.WaveFormat.SampleRate);
+            SampleHandler = new SampleHandler(wasapiCapture.WaveFormat.Channels);
 
             // Configure per-block reads rather than per-sample reads
             notificationSource = new SingleBlockNotificationStream(new SoundInSource(wasapiCapture).ToSampleSource());
